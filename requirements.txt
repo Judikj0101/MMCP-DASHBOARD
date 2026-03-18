@@ -1,0 +1,24 @@
+# MMCP Political Stability Predictor — Dependencies
+# Pin major.minor to prevent breaking changes (POLICY: no unpinned deps)
+
+# Core data
+pandas>=2.1,<3.0
+numpy>=1.26,<2.0
+
+# Statistical / ML
+scipy>=1.12,<2.0
+scikit-learn>=1.4,<2.0
+
+# Visualization (notebooks only)
+matplotlib>=3.8,<4.0
+seaborn>=0.13,<1.0
+
+# Testing
+pytest>=8.0,<9.0
+pytest-cov>=4.1,<5.0
+
+# Data validation
+pandera>=0.18,<1.0
+
+# Calibration (isotonic regression lives in sklearn, but we use this for Brier score)
+# No extra dep needed — scipy.stats + sklearn.isotonic cover it
