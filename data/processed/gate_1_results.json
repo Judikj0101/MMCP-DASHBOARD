@@ -1,0 +1,107 @@
+{
+  "phase": 1,
+  "verdict": "PASS",
+  "timestamp": "2026-03-18T07:43:20.619582",
+  "checks": [
+    {
+      "check": "dir:data/raw",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dir:data/processed",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dir:data/cases",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dir:src",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dir:tests",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dir:scripts",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "dir:notebooks",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "config.py imports",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "STATE_VECTOR_WIDTH value",
+      "status": "PASS",
+      "detail": "width=27"
+    },
+    {
+      "check": "NAMED_PATHS count",
+      "status": "PASS",
+      "detail": "found 10 paths"
+    },
+    {
+      "check": "INTERACTION_RULES defined",
+      "status": "PASS",
+      "detail": "found 3 rules"
+    },
+    {
+      "check": "DIMENSION_BLOCKS defined",
+      "status": "PASS",
+      "detail": "found 6 blocks"
+    },
+    {
+      "check": "requirements.txt exists",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "no unpinned deps",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "POLICIES.md exists & non-empty",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "PHASES.md exists & non-empty",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "src/__init__.py",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "tests/__init__.py",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "src/schemas.py exists",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "schemas.py non-empty",
+      "status": "PASS",
+      "detail": ""
+    }
+  ]
+}
