@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}MMCP — Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Conflict Monitor</h1>
+    {% if health %}
+    <span class="badge badge-{{ health.get('system_status', 'UNKNOWN')|lower }}">
+        {{ health.get('system_status', 'UNKNOWN') }}
+    </span>
+    {% endif %}
+    {% if latest_run %}
+    <span class="meta-text">Last run: {{ latest_run.get('completed_at', 'N/A') }}</span>
+    {% endif %}
+</div>
+
+<div class="region-grid" id="region-grid">
+    {% if snapshot and snapshot.get('regions') %}
+        {% for r in snapshot['regions'] %}
+        <a href="/region/{{ r.region_id }}" class="region-card risk-{{ r.primary_outputs.risk_score|int // 25 }}">
+            <div class="card-header">
+                <span class="region-name">{{ r.region_id|replace('_', ' ')|title }}</span>
+                <span class="stage-badge stage-{{ r.primary_outputs.operational_stage|lower }}">
+                    {{ r.primary_outputs.operational_stage }}
+                </span>
+            </div>
+
+            <div class="risk-gauge">
+                <svg viewBox="0 0 120 70" class="gauge-svg">
+                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none"
+                          stroke="var(--risk-color)" stroke-width="8" stroke-linecap="round"
+                          stroke-dasharray="{{ (r.primary_outputs.risk_score / 100) * 157 }} 157"/>
+                    <text x="60" y="55" text-anchor="middle" class="gauge-text">
+                        {{ r.primary_outputs.risk_score|round(1) }}
+                    </text>
+                    <text x="60" y="67" text-anchor="middle" class="gauge-label">RISK</text>
+                </svg>
+            </div>
+
+            <div class="card-meta">
+                <span class="confidence">{{ r.primary_outputs.get('confidence', '—') }}</span>
+                <span class="coverage">{{ r.primary_outputs.get('coverage', '—') }}</span>
+                {% if r.secondary_outputs and r.secondary_outputs.get('trend') %}
+                <span class="trend trend-{{ r.secondary_outputs.trend }}">
+                    {% if 'up' in r.secondary_outputs.trend %}&#9650;
+                    {% elif 'down' in r.secondary_outputs.trend %}&#9660;
+                    {% else %}&#9654;{% endif %}
+                    {{ r.secondary_outputs.trend|replace('_', ' ') }}
+                </span>
+                {% endif %}
+            </div>
+
+            {% if r.analyst_state and r.analyst_state.get('frozen') %}
+            <div class="frozen-banner">FROZEN</div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">
+            <p>Unable to load region data. Check API connection.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh region grid every 5 minutes
+    setupAutoRefresh('/api/v1/snapshot?detail=full', 300000, function(data) {
+        if (!data || !data.regions) return;
+        document.getElementById('region-grid').innerHTML = data.regions.map(regionCard).join('');
+    });
+
+    function regionCard(r) {
+        const po = r.primary_outputs;
+        const so = r.secondary_outputs || {};
+        const riskBucket = Math.min(3, Math.floor(po.risk_score / 25));
+        const dashLen = (po.risk_score / 100) * 157;
+        const trendArrow = (so.trend || '').includes('up') ? '&#9650;' :
+                           (so.trend || '').includes('down') ? '&#9660;' : '&#9654;';
+        const frozen = r.analyst_state && r.analyst_state.frozen;
+
+        return `<a href="/region/${r.region_id}" class="region-card risk-${riskBucket}">
+            <div class="card-header">
+                <span class="region-name">${r.region_id.replace(/_/g, ' ')}</span>
+                <span class="stage-badge stage-${po.operational_stage.toLowerCase()}">${po.operational_stage}</span>
+            </div>
+            <div class="risk-gauge">
+                <svg viewBox="0 0 120 70" class="gauge-svg">
+                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+                    <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="var(--risk-color)" stroke-width="8"
+                          stroke-linecap="round" stroke-dasharray="${dashLen} 157"/>
+                    <text x="60" y="55" text-anchor="middle" class="gauge-text">${po.risk_score.toFixed(1)}</text>
+                    <text x="60" y="67" text-anchor="middle" class="gauge-label">RISK</text>
+                </svg>
+            </div>
+            <div class="card-meta">
+                <span class="confidence">${po.confidence || '—'}</span>
+                <span class="coverage">${po.coverage || '—'}</span>
+                <span class="trend trend-${so.trend || ''}">${trendArrow} ${(so.trend || '').replace(/_/g, ' ')}</span>
+            </div>
+            ${frozen ? '<div class="frozen-banner">FROZEN</div>' : ''}
+        </a>`;
+    }
+</script>
+{% endblock %}

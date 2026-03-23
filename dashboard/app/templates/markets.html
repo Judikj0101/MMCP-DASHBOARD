@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}MMCP — Markets{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Market Signals</h1>
+    <span class="meta-text">Price forecasts &amp; commodity risk from conflict analysis</span>
+</div>
+
+<!-- Quick risk summary strip -->
+{% if snapshot and snapshot.get('regions') %}
+<div class="risk-strip">
+    {% for r in snapshot['regions'] %}
+    <div class="risk-chip risk-{{ r.primary_outputs.risk_score|int // 25 }}">
+        <span class="chip-name">{{ r.region_id|replace('_', ' ')|truncate(20) }}</span>
+        <span class="chip-score">{{ r.primary_outputs.risk_score|round(1) }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Price forecast cards -->
+<section class="section">
+    <h2>Price Forecasts &amp; Buy/Sell Signals</h2>
+    <div class="market-grid">
+        {% for m in market_data %}
+        <div class="market-card">
+            <div class="market-card-header">
+                <span class="region-name">{{ m.region_id|replace('_', ' ')|title }}</span>
+            </div>
+
+            {% if m.forecast %}
+            <div class="forecast-body">
+                {% if m.forecast.get('commodities') %}
+                    {% for c in m.forecast['commodities'] %}
+                    <div class="commodity-row">
+                        <span class="commodity-name">{{ c.get('name', c.get('commodity', '?')) }}</span>
+                        <span class="signal-badge signal-{{ c.get('signal', 'hold')|lower }}">
+                            {{ c.get('signal', 'HOLD')|upper }}
+                        </span>
+                        {% if c.get('price_target') %}
+                        <span class="price-target">${{ c.price_target|round(2) }}</span>
+                        {% endif %}
+                        {% if c.get('current_price') %}
+                        <span class="current-price">${{ c.current_price|round(2) }}</span>
+                        {% endif %}
+                        {% if c.get('change_pct') %}
+                        <span class="change-pct {% if c.change_pct > 0 %}positive{% elif c.change_pct < 0 %}negative{% endif %}">
+                            {{ '%+.1f'|format(c.change_pct) }}%
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% elif m.forecast.get('signal') %}
+                    <div class="commodity-row">
+                        <span class="signal-badge signal-{{ m.forecast.signal|lower }}">
+                            {{ m.forecast.signal|upper }}
+                        </span>
+                        {% if m.forecast.get('price_target') %}
+                        <span class="price-target">${{ m.forecast.price_target|round(2) }}</span>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="forecast-raw">
+                        {% for key, val in m.forecast.items() %}
+                            {% if key not in ('region_id', '_meta') %}
+                            <div class="raw-row">
+                                <span class="raw-key">{{ key|replace('_', ' ')|title }}</span>
+                                <span class="raw-val">{{ val }}</span>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="empty-state-sm">No forecast data</div>
+            {% endif %}
+
+            {% if m.commodity %}
+            <div class="commodity-risk">
+                <span class="label">Commodity Risk</span>
+                {% if m.commodity.get('risk_score') is not none %}
+                <div class="mini-bar">
+                    <div class="mini-bar-fill risk-{{ (m.commodity.risk_score|int) // 25 }}"
+                         style="width: {{ m.commodity.risk_score }}%"></div>
+                </div>
+                <span class="mini-score">{{ m.commodity.risk_score|round(1) }}</span>
+                {% else %}
+                <div class="forecast-raw">
+                    {% for key, val in m.commodity.items() %}
+                        {% if key not in ('region_id', '_meta') %}
+                        <div class="raw-row">
+                            <span class="raw-key">{{ key|replace('_', ' ')|title }}</span>
+                            <span class="raw-val">{{ val }}</span>
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Auto-refresh market data every 2 minutes
+    setupAutoRefresh('/api/v1/snapshot?detail=full', 120000, function(data) {
+        // Lightweight: just update risk strip
+        if (!data || !data.regions) return;
+        const strip = document.querySelector('.risk-strip');
+        if (strip) {
+            strip.innerHTML = data.regions.map(r => {
+                const bucket = Math.min(3, Math.floor(r.primary_outputs.risk_score / 25));
+                const name = r.region_id.replace(/_/g, ' ');
+                return `<div class="risk-chip risk-${bucket}">
+                    <span class="chip-name">${name.substring(0, 20)}</span>
+                    <span class="chip-score">${r.primary_outputs.risk_score.toFixed(1)}</span>
+                </div>`;
+            }).join('');
+        }
+    });
+</script>
+{% endblock %}

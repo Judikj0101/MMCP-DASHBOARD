@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}MMCP — Alerts{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>Alerts</h1>
+</div>
+
+<section class="section">
+    <h2>Active Alerts by Region</h2>
+    {% if snapshot and snapshot.get('regions') %}
+    <div class="alerts-list">
+        {% for r in snapshot['regions']|sort(attribute='primary_outputs.risk_score', reverse=True) %}
+        {% set po = r.primary_outputs %}
+        {% set so = r.secondary_outputs or {} %}
+        <div class="alert-row risk-{{ po.risk_score|int // 25 }}">
+            <div class="alert-region">
+                <a href="/region/{{ r.region_id }}">{{ r.region_id|replace('_', ' ')|title }}</a>
+            </div>
+            <div class="alert-details">
+                <span class="stage-badge stage-{{ po.operational_stage|lower }}">{{ po.operational_stage }}</span>
+                <span class="risk-inline">Risk: {{ po.risk_score|round(1) }}</span>
+                {% if so.get('trend') %}
+                <span class="trend trend-{{ so.trend }}">{{ so.trend|replace('_', ' ') }}</span>
+                {% endif %}
+                {% if po.risk_score >= 75 %}
+                <span class="alert-tag critical">CRITICAL</span>
+                {% elif po.risk_score >= 50 %}
+                <span class="alert-tag warning">WARNING</span>
+                {% elif po.risk_score >= 25 %}
+                <span class="alert-tag elevated">ELEVATED</span>
+                {% else %}
+                <span class="alert-tag low">LOW</span>
+                {% endif %}
+            </div>
+            {% if r.analyst_state and r.analyst_state.get('frozen') %}
+            <span class="frozen-tag">FROZEN</span>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state"><p>No data available.</p></div>
+    {% endif %}
+</section>
+
+{% if health and health.get('alerts') %}
+<section class="section">
+    <h2>System Alerts</h2>
+    <div class="alerts-list">
+        {% for alert in health.alerts %}
+        <div class="alert-row">
+            <span class="alert-tag {{ alert.get('severity', 'info')|lower }}">{{ alert.get('severity', 'INFO') }}</span>
+            <span>{{ alert.get('message', alert) }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endblock %}

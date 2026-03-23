@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}MMCP — {{ region_id|replace('_', ' ')|title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/" class="back-link">&larr; All Regions</a>
+    <h1>{{ region_id|replace('_', ' ')|title }}</h1>
+</div>
+
+{% if region %}
+<!-- Primary outputs -->
+<div class="detail-top">
+    <div class="big-gauge">
+        <svg viewBox="0 0 200 120" class="gauge-svg-lg">
+            <path d="M15 100 A85 85 0 0 1 185 100" fill="none" stroke="#333" stroke-width="12" stroke-linecap="round"/>
+            {% set dash = (region.primary_outputs.risk_score / 100) * 267 %}
+            <path d="M15 100 A85 85 0 0 1 185 100" fill="none"
+                  stroke="var(--risk-color)" stroke-width="12" stroke-linecap="round"
+                  stroke-dasharray="{{ dash }} 267"
+                  class="risk-{{ region.primary_outputs.risk_score|int // 25 }}"/>
+            <text x="100" y="85" text-anchor="middle" class="gauge-text-lg">
+                {{ region.primary_outputs.risk_score|round(1) }}
+            </text>
+            <text x="100" y="105" text-anchor="middle" class="gauge-label">RISK SCORE</text>
+        </svg>
+    </div>
+
+    <div class="primary-meta">
+        <div class="meta-row">
+            <span class="label">Stage</span>
+            <span class="stage-badge stage-{{ region.primary_outputs.operational_stage|lower }}">
+                {{ region.primary_outputs.operational_stage }}
+            </span>
+        </div>
+        <div class="meta-row">
+            <span class="label">Confidence</span>
+            <span>{{ region.primary_outputs.get('confidence', '—') }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="label">Coverage</span>
+            <span>{{ region.primary_outputs.get('coverage', '—') }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="label">LTI</span>
+            <span>{{ region.primary_outputs.get('latent_tension_index', '—') }}</span>
+        </div>
+        {% if region.secondary_outputs %}
+        <div class="meta-row">
+            <span class="label">Trend</span>
+            <span>{{ region.secondary_outputs.get('trend', '—')|replace('_', ' ') }}</span>
+        </div>
+        <div class="meta-row">
+            <span class="label">Conflict Type</span>
+            <span>{{ region.secondary_outputs.get('conflict_type', {}).get('primary', '—')|replace('_', ' ') }}</span>
+        </div>
+        {% endif %}
+        {% if region.analyst_state %}
+        <div class="meta-row">
+            <span class="label">Analyst</span>
+            <span>{{ region.analyst_state.get('last_decision', '—')|replace('_', ' ') }}
+                {% if region.analyst_state.get('frozen') %} <strong>[FROZEN]</strong>{% endif %}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Layer breakdown -->
+{% if region.get('layer_breakdown') %}
+<section class="section">
+    <h2>Layer Breakdown</h2>
+    <div class="layer-bars">
+        {% for layer_name, layer in region.layer_breakdown.items() %}
+        <div class="layer-row">
+            <span class="layer-name">{{ layer_name|upper }}</span>
+            <div class="layer-bar-track">
+                <div class="layer-bar-fill" style="width: {{ (layer.score * 100)|round(1) }}%"></div>
+            </div>
+            <span class="layer-score">{{ (layer.score * 100)|round(1) }}%</span>
+            <span class="layer-signals">{{ layer.signals_count }} signals</span>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- History chart -->
+<section class="section">
+    <h2>Risk Score History</h2>
+    <canvas id="history-chart" height="250"></canvas>
+</section>
+
+<!-- Top signals -->
+{% if region.get('top_signals') %}
+<section class="section">
+    <h2>Top Signals</h2>
+    <div class="signals-table">
+        <table>
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Reliability</th>
+                    <th>Score</th>
+                    <th>Summary</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for s in region.top_signals %}
+                <tr>
+                    <td>{{ s.get('source', '—') }}</td>
+                    <td>{{ s.get('signal_type', s.get('type', '—')) }}</td>
+                    <td>{{ s.get('severity', '—') }}</td>
+                    <td>{{ s.get('reliability', '—') }}</td>
+                    <td><strong>{{ s.get('score', s.get('final_score', '—')) }}</strong></td>
+                    <td class="signal-summary">{{ s.get('summary', s.get('description', '—'))|truncate(80) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endif %}
+
+<!-- Price forecast -->
+{% if forecast %}
+<section class="section">
+    <h2>Price Forecast</h2>
+    <div class="forecast-detail">
+        {% for key, val in forecast.items() %}
+            {% if key not in ('region_id', '_meta') %}
+            <div class="raw-row">
+                <span class="raw-key">{{ key|replace('_', ' ')|title }}</span>
+                <span class="raw-val">{{ val }}</span>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- ML Prediction -->
+{% if ml %}
+<section class="section">
+    <h2>ML Escalation Prediction</h2>
+    <div class="forecast-detail">
+        {% for key, val in ml.items() %}
+            {% if key not in ('region_id', '_meta') %}
+            <div class="raw-row">
+                <span class="raw-key">{{ key|replace('_', ' ')|title }}</span>
+                <span class="raw-val">{{ val }}</span>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+<!-- Regime Analysis -->
+{% if regime %}
+<section class="section">
+    <h2>Regime Analysis — Named Path Match</h2>
+    <div class="forecast-detail">
+        {% for key, val in regime.items() %}
+            {% if key not in ('region_id', '_meta') %}
+            <div class="raw-row">
+                <span class="raw-key">{{ key|replace('_', ' ')|title }}</span>
+                <span class="raw-val">{{ val }}</span>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% else %}
+<div class="empty-state">
+    <p>Unable to load region data for <strong>{{ region_id }}</strong>. Check API connection.</p>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const historyData = {{ history|tojson if history else 'null' }};
+    if (!historyData || !historyData.records) return;
+
+    const labels = historyData.records.map(r => r.date || r.run_date || '');
+    const scores = historyData.records.map(r => {
+        if (r.primary_outputs) return r.primary_outputs.risk_score;
+        return r.risk_score || 0;
+    });
+
+    const ctx = document.getElementById('history-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Risk Score',
+                data: scores,
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 2,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { min: 0, max: 100, grid: { color: '#222' } },
+                x: { grid: { color: '#222' }, ticks: { maxTicksLimit: 15 } }
+            },
+            plugins: { legend: { display: false } }
+        }
+    });
+})();
+</script>
+{% endblock %}
