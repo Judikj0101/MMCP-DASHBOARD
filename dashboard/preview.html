@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MMCP Dashboard — Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  darkMode: 'class',
+  theme: {
+    extend: {
+      colors: {
+        background: '#0a0a0a',
+        foreground: '#ededed',
+        card: '#161b22',
+        'card-foreground': '#c9d1d9',
+        primary: '#58a6ff',
+        'primary-foreground': '#0d1117',
+        secondary: '#21262d',
+        'secondary-foreground': '#c9d1d9',
+        muted: '#21262d',
+        'muted-foreground': '#8b949e',
+        accent: '#1c2333',
+        'accent-foreground': '#c9d1d9',
+        destructive: '#f85149',
+        border: '#30363d',
+      }
+    }
+  }
+}
+</script>
+<style>
+  body { background: #0a0a0a; color: #ededed; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; }
+  .sparkle-bg {
+    background: radial-gradient(ellipse at center, rgba(88,166,255,0.08) 0%, transparent 70%);
+    position: relative;
+    overflow: hidden;
+  }
+  .sparkle-bg::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(2px 2px at 20px 30px, white, transparent),
+                      radial-gradient(2px 2px at 40px 70px, white, transparent),
+                      radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.6), transparent),
+                      radial-gradient(2px 2px at 160px 120px, white, transparent),
+                      radial-gradient(1px 1px at 200px 60px, rgba(255,255,255,0.5), transparent),
+                      radial-gradient(2px 2px at 300px 80px, white, transparent),
+                      radial-gradient(1px 1px at 400px 30px, rgba(255,255,255,0.7), transparent),
+                      radial-gradient(2px 2px at 500px 100px, white, transparent),
+                      radial-gradient(1px 1px at 600px 50px, rgba(255,255,255,0.4), transparent),
+                      radial-gradient(2px 2px at 700px 90px, white, transparent);
+    background-size: 800px 200px;
+    animation: sparkle 8s linear infinite;
+    opacity: 0.6;
+  }
+  @keyframes sparkle { from { background-position: 0 0; } to { background-position: 800px 0; } }
+  .gauge-arc { transition: stroke-dasharray 1s ease; }
+</style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- NAVBAR -->
+<nav class="sticky top-0 z-50 border-b border-border bg-card/90 backdrop-blur-sm">
+  <div class="max-w-7xl mx-auto px-4 flex items-center h-14 gap-6">
+    <a href="#" class="flex items-center gap-2 font-bold text-lg tracking-wider text-primary">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-2.48a2 2 0 0 0-1.93 1.46l-2.35 8.36a.25.25 0 0 1-.48 0L9.24 2.18a.25.25 0 0 0-.48 0l-2.35 8.36A2 2 0 0 1 4.49 12H2"/></svg>
+      MMCP
+    </a>
+    <div class="flex items-center gap-1">
+      <a href="#overview" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-accent text-accent-foreground font-medium">Overview</a>
+      <a href="#markets" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50">Markets</a>
+      <a href="#alerts" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50">Alerts</a>
+      <a href="#system" class="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-muted-foreground hover:text-foreground hover:bg-accent/50">System</a>
+    </div>
+  </div>
+</nav>
+
+<main class="flex-1">
+  <!-- HERO SECTION with sparkles -->
+  <div class="h-80 w-full bg-black sparkle-bg flex flex-col items-center justify-center">
+    <h1 class="text-6xl md:text-8xl font-bold text-center text-white relative z-20">MMCP</h1>
+    <p class="text-lg md:text-xl text-neutral-300 relative z-20 mt-2">Conflict Monitor Dashboard</p>
+    <span class="inline-flex items-center rounded-full border border-transparent bg-primary text-primary-foreground px-2.5 py-0.5 text-xs font-semibold mt-3 relative z-20">HEALTHY</span>
+  </div>
+
+  <!-- OVERVIEW — Top 5 Risk Regions -->
+  <div id="overview" class="max-w-7xl mx-auto w-full p-4 md:p-8">
+    <div class="flex items-center justify-between mb-6">
+      <h2 class="text-2xl font-bold">
+        Top Risk Regions
+        <span class="text-sm font-normal text-muted-foreground ml-2">(showing 5 of 10)</span>
+      </h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      <!-- Region Card 1 -->
+      <div class="rounded-lg border border-red-500/30 bg-card text-card-foreground shadow-sm hover:border-primary/50 transition-colors cursor-pointer relative">
+        <div class="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-bl-md rounded-tr-md">FROZEN</div>
+        <div class="flex flex-col space-y-1.5 p-6 pb-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium capitalize">eastern europe ua ru</h3>
+            <span class="inline-flex items-center rounded-full border border-transparent bg-destructive text-white px-2.5 py-0.5 text-xs font-semibold">STG_5</span>
+          </div>
+        </div>
+        <div class="p-6 pt-0 flex flex-col items-center gap-2">
+          <svg viewBox="0 0 120 70" class="w-28 h-16">
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#f85149" stroke-width="8" stroke-linecap="round" stroke-dasharray="128 157" class="gauge-arc"/>
+            <text x="60" y="52" text-anchor="middle" fill="#f0f6fc" font-size="20" font-weight="bold">81.4</text>
+            <text x="60" y="66" text-anchor="middle" fill="#8b949e" font-size="8" letter-spacing="0.1em">RISK</text>
+          </svg>
+          <div class="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>HIGH</span><span>FULL</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2"><path d="M22 17H2"/><path d="M22 17L16 11"/><path d="M22 17L16 23"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Region Card 2 -->
+      <div class="rounded-lg border border-red-500/30 bg-card text-card-foreground shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
+        <div class="flex flex-col space-y-1.5 p-6 pb-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium capitalize">israel lebanon gaza</h3>
+            <span class="inline-flex items-center rounded-full border border-transparent bg-destructive text-white px-2.5 py-0.5 text-xs font-semibold">STG_4</span>
+          </div>
+        </div>
+        <div class="p-6 pt-0 flex flex-col items-center gap-2">
+          <svg viewBox="0 0 120 70" class="w-28 h-16">
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#f85149" stroke-width="8" stroke-linecap="round" stroke-dasharray="118 157" class="gauge-arc"/>
+            <text x="60" y="52" text-anchor="middle" fill="#f0f6fc" font-size="20" font-weight="bold">75.2</text>
+            <text x="60" y="66" text-anchor="middle" fill="#8b949e" font-size="8" letter-spacing="0.1em">RISK</text>
+          </svg>
+          <div class="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>HIGH</span><span>FULL</span>
+            <span class="text-red-400">&#9650; rising</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Region Card 3 -->
+      <div class="rounded-lg border border-orange-400/30 bg-card text-card-foreground shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
+        <div class="flex flex-col space-y-1.5 p-6 pb-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium capitalize">yemen</h3>
+            <span class="inline-flex items-center rounded-full border border-transparent bg-primary text-primary-foreground px-2.5 py-0.5 text-xs font-semibold">STG_3</span>
+          </div>
+        </div>
+        <div class="p-6 pt-0 flex flex-col items-center gap-2">
+          <svg viewBox="0 0 120 70" class="w-28 h-16">
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#db6d28" stroke-width="8" stroke-linecap="round" stroke-dasharray="94 157" class="gauge-arc"/>
+            <text x="60" y="52" text-anchor="middle" fill="#f0f6fc" font-size="20" font-weight="bold">59.8</text>
+            <text x="60" y="66" text-anchor="middle" fill="#8b949e" font-size="8" letter-spacing="0.1em">RISK</text>
+          </svg>
+          <div class="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>MEDIUM</span><span>PARTIAL</span>
+            <span class="text-muted-foreground">&#9654; stable</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Region Card 4 -->
+      <div class="rounded-lg border border-orange-400/30 bg-card text-card-foreground shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
+        <div class="flex flex-col space-y-1.5 p-6 pb-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium capitalize">iran proxy axis</h3>
+            <span class="inline-flex items-center rounded-full border border-transparent bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs font-semibold">STG_2</span>
+          </div>
+        </div>
+        <div class="p-6 pt-0 flex flex-col items-center gap-2">
+          <svg viewBox="0 0 120 70" class="w-28 h-16">
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#db6d28" stroke-width="8" stroke-linecap="round" stroke-dasharray="78 157" class="gauge-arc"/>
+            <text x="60" y="52" text-anchor="middle" fill="#f0f6fc" font-size="20" font-weight="bold">50.1</text>
+            <text x="60" y="66" text-anchor="middle" fill="#8b949e" font-size="8" letter-spacing="0.1em">RISK</text>
+          </svg>
+          <div class="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>MEDIUM</span><span>FULL</span>
+            <span class="text-green-400">&#9660; declining</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Region Card 5 -->
+      <div class="rounded-lg border border-yellow-400/30 bg-card text-card-foreground shadow-sm hover:border-primary/50 transition-colors cursor-pointer">
+        <div class="flex flex-col space-y-1.5 p-6 pb-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium capitalize">kashmir in pk</h3>
+            <span class="inline-flex items-center rounded-full border border-transparent bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs font-semibold">STG_1</span>
+          </div>
+        </div>
+        <div class="p-6 pt-0 flex flex-col items-center gap-2">
+          <svg viewBox="0 0 120 70" class="w-28 h-16">
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#333" stroke-width="8" stroke-linecap="round"/>
+            <path d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke="#d29922" stroke-width="8" stroke-linecap="round" stroke-dasharray="55 157" class="gauge-arc"/>
+            <text x="60" y="52" text-anchor="middle" fill="#f0f6fc" font-size="20" font-weight="bold">35.2</text>
+            <text x="60" y="66" text-anchor="middle" fill="#8b949e" font-size="8" letter-spacing="0.1em">RISK</text>
+          </svg>
+          <div class="flex items-center gap-3 text-xs text-muted-foreground">
+            <span>LOW</span><span>PARTIAL</span>
+            <span class="text-muted-foreground">&#9654; stable</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Show All button -->
+    <div class="flex justify-center mt-6">
+      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-border bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 transition-colors">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><path d="m6 9 6 6 6-6"/></svg>
+        Show all (10)
+      </button>
+    </div>
+  </div>
+
+  <!-- MARKETS SECTION -->
+  <div id="markets" class="max-w-7xl mx-auto w-full p-4 md:p-8 border-t border-border mt-4">
+    <h2 class="text-2xl font-bold mb-2">Market Signals</h2>
+    <p class="text-muted-foreground text-sm mb-6">Price forecasts & commodity risk from conflict analysis</p>
+
+    <!-- Risk strip -->
+    <div class="flex gap-2 overflow-x-auto pb-2 mb-6">
+      <div class="flex flex-col items-center px-3 py-2 rounded-lg border border-red-500 bg-card min-w-[80px]"><span class="text-[10px] text-muted-foreground">eastern europe</span><span class="text-lg font-bold">81.4</span></div>
+      <div class="flex flex-col items-center px-3 py-2 rounded-lg border border-red-500 bg-card min-w-[80px]"><span class="text-[10px] text-muted-foreground">israel gaza</span><span class="text-lg font-bold">75.2</span></div>
+      <div class="flex flex-col items-center px-3 py-2 rounded-lg border border-orange-400 bg-card min-w-[80px]"><span class="text-[10px] text-muted-foreground">yemen</span><span class="text-lg font-bold">59.8</span></div>
+      <div class="flex flex-col items-center px-3 py-2 rounded-lg border border-orange-400 bg-card min-w-[80px]"><span class="text-[10px] text-muted-foreground">iran proxy</span><span class="text-lg font-bold">50.1</span></div>
+      <div class="flex flex-col items-center px-3 py-2 rounded-lg border border-yellow-400 bg-card min-w-[80px]"><span class="text-[10px] text-muted-foreground">kashmir</span><span class="text-lg font-bold">35.2</span></div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <!-- Market Card 1 -->
+      <div class="rounded-lg border bg-card shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-border">
+          <span class="text-sm font-medium capitalize">eastern europe ua ru</span>
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_5</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between border-b border-border/50 pb-1.5">
+            <span class="text-sm">Natural Gas</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-red-500/20 text-red-400 px-2.5 py-0.5 text-xs font-bold">SELL</span>
+              <span class="text-sm font-mono">$4.82</span>
+              <span class="text-xs font-mono text-red-400">-3.2%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between border-b border-border/50 pb-1.5">
+            <span class="text-sm">Wheat</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-green-500/20 text-green-400 px-2.5 py-0.5 text-xs font-bold">BUY</span>
+              <span class="text-sm font-mono">$7.15</span>
+              <span class="text-xs font-mono text-green-400">+5.1%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pb-1.5">
+            <span class="text-sm">Crude Oil</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-yellow-500/20 text-yellow-400 px-2.5 py-0.5 text-xs font-bold">HOLD</span>
+              <span class="text-sm font-mono">$78.30</span>
+              <span class="text-xs font-mono">+0.4%</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-border">
+          <span class="text-xs text-muted-foreground">Commodity Risk</span>
+          <div class="h-1.5 bg-muted rounded-full mt-1"><div class="h-full rounded-full bg-red-500" style="width:78%"></div></div>
+          <span class="text-xs font-mono">78.0</span>
+        </div>
+      </div>
+
+      <!-- Market Card 2 -->
+      <div class="rounded-lg border bg-card shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-border">
+          <span class="text-sm font-medium capitalize">israel lebanon gaza</span>
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_4</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between border-b border-border/50 pb-1.5">
+            <span class="text-sm">Crude Oil</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-green-500/20 text-green-400 px-2.5 py-0.5 text-xs font-bold">BUY</span>
+              <span class="text-sm font-mono">$82.10</span>
+              <span class="text-xs font-mono text-green-400">+2.8%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pb-1.5">
+            <span class="text-sm">ILS/USD</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-red-500/20 text-red-400 px-2.5 py-0.5 text-xs font-bold">SELL</span>
+              <span class="text-sm font-mono">$0.271</span>
+              <span class="text-xs font-mono text-red-400">-1.5%</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-border">
+          <span class="text-xs text-muted-foreground">Commodity Risk</span>
+          <div class="h-1.5 bg-muted rounded-full mt-1"><div class="h-full rounded-full bg-orange-400" style="width:65%"></div></div>
+          <span class="text-xs font-mono">65.0</span>
+        </div>
+      </div>
+
+      <!-- Market Card 3 -->
+      <div class="rounded-lg border bg-card shadow-sm p-4">
+        <div class="flex items-center justify-between mb-3 pb-2 border-b border-border">
+          <span class="text-sm font-medium capitalize">yemen</span>
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_3</span>
+        </div>
+        <div class="space-y-2">
+          <div class="flex items-center justify-between border-b border-border/50 pb-1.5">
+            <span class="text-sm">Shipping Rates</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-green-500/20 text-green-400 px-2.5 py-0.5 text-xs font-bold">BUY</span>
+              <span class="text-sm font-mono">$3,450</span>
+              <span class="text-xs font-mono text-green-400">+12.3%</span>
+            </div>
+          </div>
+          <div class="flex items-center justify-between pb-1.5">
+            <span class="text-sm">Brent Crude</span>
+            <div class="flex items-center gap-2">
+              <span class="inline-flex items-center rounded-full bg-yellow-500/20 text-yellow-400 px-2.5 py-0.5 text-xs font-bold">HOLD</span>
+              <span class="text-sm font-mono">$79.60</span>
+              <span class="text-xs font-mono">+0.8%</span>
+            </div>
+          </div>
+        </div>
+        <div class="mt-3 pt-2 border-t border-border">
+          <span class="text-xs text-muted-foreground">Commodity Risk</span>
+          <div class="h-1.5 bg-muted rounded-full mt-1"><div class="h-full rounded-full bg-orange-400" style="width:55%"></div></div>
+          <span class="text-xs font-mono">55.0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex justify-center mt-6">
+      <button class="inline-flex items-center justify-center rounded-md text-sm font-medium border border-border bg-background hover:bg-accent h-10 px-4 py-2">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><path d="m6 9 6 6 6-6"/></svg>
+        Show all (10)
+      </button>
+    </div>
+  </div>
+
+  <!-- ALERTS SECTION -->
+  <div id="alerts" class="max-w-7xl mx-auto w-full p-4 md:p-8 border-t border-border mt-4">
+    <h2 class="text-2xl font-bold mb-6">Alerts</h2>
+    <div class="space-y-3">
+      <div class="rounded-lg border bg-card shadow-sm border-l-4 border-l-red-500 flex items-center justify-between py-4 px-4 flex-wrap gap-2">
+        <span class="font-medium capitalize">eastern europe ua ru</span>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_5</span>
+          <span class="text-sm font-mono">Risk: 81.4</span>
+          <span class="inline-flex items-center rounded-full bg-destructive text-white px-2.5 py-0.5 text-xs font-semibold">CRITICAL</span>
+          <span class="inline-flex items-center rounded-full bg-destructive text-white px-2.5 py-0.5 text-xs font-semibold">FROZEN</span>
+        </div>
+      </div>
+      <div class="rounded-lg border bg-card shadow-sm border-l-4 border-l-red-500 flex items-center justify-between py-4 px-4 flex-wrap gap-2">
+        <span class="font-medium capitalize">israel lebanon gaza</span>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_4</span>
+          <span class="text-sm font-mono">Risk: 75.2</span>
+          <span class="text-xs text-muted-foreground capitalize">rising</span>
+          <span class="inline-flex items-center rounded-full bg-destructive text-white px-2.5 py-0.5 text-xs font-semibold">CRITICAL</span>
+        </div>
+      </div>
+      <div class="rounded-lg border bg-card shadow-sm border-l-4 border-l-orange-400 flex items-center justify-between py-4 px-4 flex-wrap gap-2">
+        <span class="font-medium capitalize">yemen</span>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_3</span>
+          <span class="text-sm font-mono">Risk: 59.8</span>
+          <span class="inline-flex items-center rounded-full bg-primary text-primary-foreground px-2.5 py-0.5 text-xs font-semibold">WARNING</span>
+        </div>
+      </div>
+      <div class="rounded-lg border bg-card shadow-sm border-l-4 border-l-yellow-400 flex items-center justify-between py-4 px-4 flex-wrap gap-2">
+        <span class="font-medium capitalize">kashmir in pk</span>
+        <div class="flex items-center gap-3 flex-wrap">
+          <span class="inline-flex items-center rounded-full border text-foreground px-2.5 py-0.5 text-xs font-semibold">STG_1</span>
+          <span class="text-sm font-mono">Risk: 35.2</span>
+          <span class="inline-flex items-center rounded-full bg-secondary text-secondary-foreground px-2.5 py-0.5 text-xs font-semibold">ELEVATED</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+</body>
+</html>
